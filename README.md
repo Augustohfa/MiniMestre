@@ -196,7 +196,7 @@ Desenvolvido com ❤️ para facilitar a gestão acadêmica
 Se você encontrar algum problema ou tiver sugestões, por favor:
 
 - Abra uma [issue](https://github.com/seu-usuario/unimestre/issues)
-- Entre em contato através do email: seu-email@exemplo.com
+- Entre em contato através do email: augusto@azvdo.me
 
 ---
 
