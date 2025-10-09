@@ -11,3 +11,4 @@ credentials.json
 _temp_*.json
 # Virtual environments
 .venv
+uv.lock
