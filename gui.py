@@ -91,14 +91,15 @@ class AlunosTab(ttk.Frame):
 
         toolbar = ttk.Frame(self)
         toolbar.grid(row=0, column=0, sticky="ew", pady=(10, 5), padx=10)
-        for i in range(6):
+        for i in range(7):
             toolbar.columnconfigure(i, weight=0)
-        ttk.Button(toolbar, text="Adicionar", command=self.add_aluno).grid(row=0, column=0, padx=2)
+        ttk.Button(toolbar, text="Adicionar Aluno", command=self.add_aluno).grid(row=0, column=0, padx=2)
         ttk.Button(toolbar, text="Adicionar Nota", command=self.add_nota).grid(row=0, column=1, padx=2)
         ttk.Button(toolbar, text="Remover Nota", command=self.remover_nota).grid(row=0, column=2, padx=2)
         ttk.Button(toolbar, text="Atualizar Faltas", command=self.atualizar_faltas).grid(row=0, column=3, padx=2)
         ttk.Button(toolbar, text="Recarregar", command=self.reload).grid(row=0, column=4, padx=2)
         ttk.Button(toolbar, text="Salvar", command=self.save).grid(row=0, column=5, padx=2)
+        ttk.Button(toolbar, text="Ver Detalhes", command=self.ver_detalhes_aluno).grid(row=0, column=6, padx=2)
 
         cols = ("nome", "notas", "media", "faltas", "situacao")
         self.tree = ttk.Treeview(self, columns=cols, show="headings")
@@ -113,6 +114,9 @@ class AlunosTab(ttk.Frame):
         self.tree.column("media", width=70, anchor=tk.E)
         self.tree.column("faltas", width=60, anchor=tk.CENTER)
         self.tree.column("situacao", width=100)
+
+        # Duplo clique para abrir detalhes do aluno
+        self.tree.bind("<Double-1>", lambda e: self.ver_detalhes_aluno())
 
     def reload(self):
         self.alunos = carregar(ARQ_ALUNOS) or []
@@ -195,6 +199,49 @@ class AlunosTab(ttk.Frame):
         self.alunos[idx]["faltas"] = int(novo)
         self._refresh_table()
 
+    def ver_detalhes_aluno(self):
+        idx = self._get_selected_index()
+        if idx < 0:
+            return
+        aluno = self.alunos[idx]
+        media, situacao = calcular_media_e_situacao(aluno)
+
+        win = tk.Toplevel(self)
+        win.title(f"Detalhes do Aluno - {aluno.get('nome','')}")
+        win.geometry("560x420")
+        win.minsize(480, 360)
+
+        header = ttk.Frame(win)
+        header.pack(fill="x", padx=12, pady=8)
+        ttk.Label(header, text="Resumo", font=("Segoe UI", 11, "bold")).pack(anchor="w")
+
+        text_frame = ttk.Frame(win)
+        text_frame.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+
+        txt = tk.Text(text_frame, wrap="word")
+        txt.pack(side="left", fill="both", expand=True)
+        scroll = ttk.Scrollbar(text_frame, orient="vertical", command=txt.yview)
+        scroll.pack(side="right", fill="y")
+        txt.configure(yscrollcommand=scroll.set)
+
+        resumo = (
+            f"Nome: {aluno.get('nome','')}\n"
+            f"Faltas: {aluno.get('faltas',0)}\n"
+            f"Média Ponderada: {media:.2f}\n"
+            f"Situação: {situacao}\n"
+            "\nNotas:\n"
+        )
+        txt.insert("1.0", resumo)
+
+        notas = aluno.get("notas", [])
+        if notas:
+            for i, n in enumerate(notas, start=1):
+                txt.insert("end", f"  {i}. Nota: {n['valor']}  |  Peso: {n['peso']}\n")
+        else:
+            txt.insert("end", "  — Sem notas cadastradas —\n")
+
+        txt.configure(state="disabled")
+
 
 class AulasTab(ttk.Frame):
     def __init__(self, master):
@@ -212,6 +259,7 @@ class AulasTab(ttk.Frame):
         ttk.Button(toolbar, text="Registrar Aula", command=self.add_aula).grid(row=0, column=0, padx=2)
         ttk.Button(toolbar, text="Recarregar", command=self.reload).grid(row=0, column=1, padx=2)
         ttk.Button(toolbar, text="Salvar", command=self.save).grid(row=0, column=2, padx=2)
+        ttk.Button(toolbar, text="Ver Detalhes", command=self.ver_detalhes_aula).grid(row=0, column=3, padx=2)
 
         cols = ("data", "conteudo")
         self.tree = ttk.Treeview(self, columns=cols, show="headings")
@@ -220,6 +268,9 @@ class AulasTab(ttk.Frame):
         self.tree.heading("conteudo", text="Conteúdo")
         self.tree.column("data", width=160)
         self.tree.column("conteudo", width=500)
+
+        # Duplo clique para abrir detalhes da aula
+        self.tree.bind("<Double-1>", lambda e: self.ver_detalhes_aula())
 
     def reload(self):
         self.aulas = carregar(ARQ_AULAS) or []
@@ -242,6 +293,35 @@ class AulasTab(ttk.Frame):
         data = datetime.now().strftime("%d/%m/%Y %H:%M")
         self.aulas.append({"data": data, "conteudo": conteudo})
         self._refresh_table()
+
+    def ver_detalhes_aula(self):
+        sel = self.tree.selection()
+        if not sel:
+            messagebox.showwarning("Seleção", "Selecione uma aula na lista.")
+            return
+        idx = int(sel[0])
+        aula = self.aulas[idx]
+
+        win = tk.Toplevel(self)
+        win.title(f"Detalhes da Aula - {aula.get('data','')}")
+        win.geometry("700x480")
+        win.minsize(560, 400)
+
+        header = ttk.Frame(win)
+        header.pack(fill="x", padx=12, pady=8)
+        ttk.Label(header, text=f"Data/Hora: {aula.get('data','')}", font=("Segoe UI", 11, "bold")).pack(anchor="w")
+
+        text_frame = ttk.Frame(win)
+        text_frame.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+
+        txt = tk.Text(text_frame, wrap="word")
+        txt.pack(side="left", fill="both", expand=True)
+        scroll = ttk.Scrollbar(text_frame, orient="vertical", command=txt.yview)
+        scroll.pack(side="right", fill="y")
+        txt.configure(yscrollcommand=scroll.set)
+
+        txt.insert("1.0", aula.get("conteudo", ""))
+        txt.configure(state="disabled")
 
 
 class MainApp(tk.Tk):
