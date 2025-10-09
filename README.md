@@ -62,19 +62,14 @@ pip install -r requirements.txt
    - Adicione seu email em "Test users"
 5. Crie credenciais OAuth 2.0:
    - Vá em "Credentials" → "Create Credentials" → "OAuth client ID"
-   - Escolha "Desktop app"
    - Baixe o arquivo JSON e renomeie para `client_secrets.json`
 6. Coloque o arquivo `client_secrets.json` na raiz do projeto
 
 ### ▶️ Executando o Sistema
 
-```bash
-python main.py
-```
+Agora o projeto usa layout baseado em `src/` e oferece pontos de entrada para CLI e GUI.
 
-Na primeira execução, o navegador abrirá automaticamente para você autorizar o acesso ao Google Drive.
-
-## 📖 Como Usar
+Opção A (sem instalar, Windows PowerShell):
 
 ### Menu Principal
 
@@ -119,15 +114,28 @@ Após fazer login, você terá acesso às seguintes opções:
 
 ```
 unimestre/
-├── main.py                 # Menu principal e fluxo do sistema
-├── alunos.py              # Lógica de gerenciamento de alunos
-├── aulas.py               # Lógica de registro de aulas
-├── utils.py               # Funções auxiliares
-├── drive_integration.py   # Integração com Google Drive
-├── settings.yaml          # Configurações do PyDrive
-├── client_secrets.json    # Credenciais OAuth (não versionado)
-├── requirements.txt       # Dependências do projeto
-└── README.md             # Este arquivo
+├── src/
+│  └── unimestre/
+│     ├── cli/
+│     │  └── main.py              # ponto de entrada CLI
+│     ├── gui/
+│     │  └── app.py               # ponto de entrada GUI (Tkinter)
+│     ├── core/
+│     │  ├── alunos.py            # regras de alunos (I/O via CLI/GUI)
+│     │  └── aulas.py             # regras de aulas (I/O via CLI/GUI)
+│     ├── infra/
+│     │  └── drive.py             # integração com Google Drive (PyDrive)
+│     ├── shared/
+│     │  └── utils.py             # funções utilitárias (carregar/salvar)
+│     └── config/
+│        └── settings.yaml        # configurações do PyDrive
+├── scripts/
+│  ├── run-cli.ps1                # helper para Windows (CLI)
+│  └── run-gui.ps1                # helper para Windows (GUI)
+├── .env                          # variáveis de ambiente
+├── pyproject.toml                # dependências e console scripts
+├── requirements.txt              # alternativa de instalação
+└── README.md
 ```
 
 ## 🔒 Segurança e Privacidade
@@ -138,7 +146,7 @@ unimestre/
 - ✅ Credenciais salvas localmente apenas para renovação de token
 - ✅ Senha do professor para acesso ao sistema (padrão: `1234`)
 
-> ⚠️ **Importante**: Altere a senha padrão no arquivo `main.py` (linha 30)
+> ⚠️ **Importante**: Defina a senha no `.env` com `PROFESSOR_PASSWORD` (fallback suportado: `SENHA_PROFESSOR`).
 
 ## 🛠️ Tecnologias Utilizadas
 

@@ -1,9 +1,10 @@
-# aulas.py - Registro e listagem de aulas
+# aulas.py - Registro e listagem de aulas (core)
 
-from utils import salvar, carregar
 from datetime import datetime
+from unimestre.shared.utils import salvar, carregar
 
 ARQ_AULAS = "aulas.json"
+# Carrega dados existentes
 aulas = carregar(ARQ_AULAS)
 
 

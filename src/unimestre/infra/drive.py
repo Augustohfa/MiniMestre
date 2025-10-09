@@ -13,13 +13,13 @@ def inicializar_drive():
     global _drive, _gauth
     if _drive is not None:
         return _drive
-    
+
     print("\n🔐 Iniciando autenticação com Google Drive...")
     _gauth = GoogleAuth()
-    
+
     # Tenta carregar credenciais salvas
     _gauth.LoadCredentialsFile("credentials.json")
-    
+
     if _gauth.credentials is None:
         # Primeira autenticação
         try:
@@ -32,10 +32,10 @@ def inicializar_drive():
     else:
         # Usa credenciais salvas
         _gauth.Authorize()
-    
+
     # Salva credenciais para próxima vez
     _gauth.SaveCredentialsFile("credentials.json")
-    
+
     _drive = GoogleDrive(_gauth)
     print("✅ Autenticação realizada com sucesso!")
     return _drive
@@ -53,11 +53,11 @@ def carregar_json_do_drive(nome_arquivo):
     """Carrega dados JSON diretamente do Drive sem criar arquivo local permanente"""
     drive = inicializar_drive()
     arquivo = buscar_arquivo_no_drive(nome_arquivo)
-    
+
     if not arquivo:
         print(f"📄 {nome_arquivo} não encontrado no Drive. Criando novo...")
         return []
-    
+
     # Baixa temporariamente para ler
     temp_file = f"_temp_{nome_arquivo}"
     try:
@@ -77,18 +77,18 @@ def carregar_json_do_drive(nome_arquivo):
 def salvar_json_no_drive(nome_arquivo, dados):
     """Salva dados JSON diretamente no Drive"""
     drive = inicializar_drive()
-    
+
     # Cria arquivo temporário local
     temp_file = f"_temp_{nome_arquivo}"
     with open(temp_file, 'w', encoding='utf-8') as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)
-    
+
     # Garante que o arquivo foi fechado
     time.sleep(0.1)
-    
+
     try:
         arquivo = buscar_arquivo_no_drive(nome_arquivo)
-        
+
         if arquivo:
             # Atualiza arquivo existente
             arquivo.SetContentFile(temp_file)
@@ -98,7 +98,7 @@ def salvar_json_no_drive(nome_arquivo, dados):
             arquivo = drive.CreateFile({'title': nome_arquivo})
             arquivo.SetContentFile(temp_file)
             arquivo.Upload()
-        
+
         print(f"☁️ {nome_arquivo} salvo no Drive")
     finally:
         # Remove arquivo temporário com retry para Windows
@@ -109,7 +109,7 @@ def _remover_arquivo_seguro(caminho_arquivo):
     """Remove arquivo com retry para evitar erro de permissão no Windows"""
     if not os.path.exists(caminho_arquivo):
         return
-    
+
     max_tentativas = 5
     for tentativa in range(max_tentativas):
         try:
@@ -131,7 +131,7 @@ def limpar_arquivos_locais():
             _remover_arquivo_seguro(arquivo)
             if not os.path.exists(arquivo):
                 print(f"🗑️ {arquivo} removido do computador")
-    
+
     # Remove também arquivos temporários que possam ter ficado
     try:
         for arquivo in os.listdir('.'):
@@ -139,5 +139,5 @@ def limpar_arquivos_locais():
                 _remover_arquivo_seguro(arquivo)
                 if not os.path.exists(arquivo):
                     print(f"🗑️ {arquivo} (temporário) removido")
-    except Exception as e:
-        pass  # Ignora erros ao listar diretório
+    except Exception:
+        pass

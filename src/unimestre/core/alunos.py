@@ -1,6 +1,7 @@
-from utils import salvar, carregar
+from unimestre.shared.utils import salvar, carregar
 
 ARQ_ALUNOS = "alunos.json"
+# Carrega dados existentes
 alunos = carregar(ARQ_ALUNOS)
 
 

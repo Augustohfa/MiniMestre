@@ -2,12 +2,16 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from typing import List, Dict, Any
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-from drive_integration import inicializar_drive, limpar_arquivos_locais
-from utils import carregar, salvar
+from unimestre.infra.drive import inicializar_drive, limpar_arquivos_locais
+from unimestre.shared.utils import carregar, salvar
 
 ARQ_ALUNOS = "alunos.json"
 ARQ_AULAS = "aulas.json"
+
+load_dotenv()
 
 
 def calcular_media_e_situacao(aluno: Dict[str, Any]) -> (float, str):
@@ -68,7 +72,11 @@ class LoginFrame(ttk.Frame):
             self.status.config(text="❌ Falha na autenticação")
 
     def _entrar(self):
-        senha_professor = "1234"  # padrão; altere aqui se desejar
+        senha_professor = (
+            os.getenv("PROFESSOR_PASSWORD")
+            or os.getenv("SENHA_PROFESSOR")
+            or "1234"
+        )
         if not self._autenticado:
             messagebox.showwarning("Aviso", "Realize a autenticação com o Google Drive primeiro.")
             return

@@ -1,24 +1,29 @@
-from alunos import (
+import os
+from dotenv import load_dotenv
+
+from unimestre.core.alunos import (
     cadastrar_aluno,
     listar_alunos,
     adicionar_aluno_e_salvar,
-    atualizar_aluno
+    atualizar_aluno,
 )
-from aulas import registrar_aula, listar_aulas
-from drive_integration import inicializar_drive, limpar_arquivos_locais
+from unimestre.core.aulas import registrar_aula, listar_aulas
+from unimestre.infra.drive import inicializar_drive, limpar_arquivos_locais
+
+load_dotenv()
 
 
 def menu():
     print("📚 Bem-vindo ao sistema UNIMESTRE SIMPLIFICADO!")
-    
+
     # Login obrigatório com Google Drive
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("🔐 AUTENTICAÇÃO NECESSÁRIA")
-    print("="*50)
+    print("=" * 50)
     print("Este sistema armazena os dados no seu Google Drive.")
     print("Você será redirecionado para fazer login com sua conta Google.")
-    print("="*50 + "\n")
-    
+    print("=" * 50 + "\n")
+
     try:
         inicializar_drive()
     except Exception as e:
@@ -26,8 +31,12 @@ def menu():
         print("O sistema não pode continuar sem autenticação.")
         return
 
-    # Senha do professor
-    senha_professor = "1234"
+    # Senha do professor (carregada do .env)
+    senha_professor = (
+        os.getenv("PROFESSOR_PASSWORD")
+        or os.getenv("SENHA_PROFESSOR")
+        or "1234"
+    )
     if input("\nDigite a senha do professor: ") != senha_professor:
         print("Senha incorreta. Saindo...")
         return
@@ -65,5 +74,5 @@ def menu():
             print("⚠️ Opção inválida! Tente novamente.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     menu()

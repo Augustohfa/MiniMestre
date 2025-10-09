@@ -1,0 +1,1 @@
+# Core (regras de negócio)

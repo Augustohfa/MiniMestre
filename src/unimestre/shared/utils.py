@@ -1,8 +1,8 @@
-# utils.py - Funções auxiliares de leitura e escrita de JSON
-# Agora integrado com Google Drive
+# Funções auxiliares de leitura e escrita de JSON
+# Integradas ao Google Drive via camada infra
 
-import json
-from drive_integration import carregar_json_do_drive, salvar_json_no_drive
+from unimestre.infra.drive import carregar_json_do_drive, salvar_json_no_drive
+
 
 def carregar(arquivo):
     """Carrega dados de um arquivo JSON do Google Drive"""
